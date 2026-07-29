@@ -27,3 +27,11 @@ body {
   font-family: Consolas, monospace;
   letter-spacing: 1px;
 }
+.warning {
+    display: none;
+    color: #ff4d4d;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 14px;
+}

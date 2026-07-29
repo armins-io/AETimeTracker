@@ -25,33 +25,52 @@ function updateUI() {
     document.getElementById("sessionTimer").textContent = formatTime(sessionSeconds);
     document.getElementById("overallTimer").textContent = formatTime(overallSeconds + sessionSeconds);
 }
+// Show warning when no saved project exists
+function updateSaveWarning() {
+    var warning = document.getElementById("saveWarning");
+    if (!warning) {
+        return;
+    }
+    if (currentProjectPath) {
+        warning.style.display = "none";
+    } else {
+        warning.style.display = "block";
+    }
+}
 async function loadProject() {
     currentProjectPath = await evalScript("getCurrentProjectPath()");
+    if (currentProjectPath === "null" || currentProjectPath === "") {
+        currentProjectPath = null;
+    }
+    updateSaveWarning();
     overallSeconds = 0;
     sessionSeconds = 0;
-    if (currentProjectPath) {
-        var content = await evalScript("loadTrackedTimes()");
-        if (content && content !== "null") {
-            var lines = content.split(/\r?\n/);
-            for (var i = 0; i < lines.length; i++) {
-                var line = lines[i];
-                var index = line.lastIndexOf(":");
-                if (index === -1) {
-                    continue;
-                }
-                var path = line.substring(0, index);
-                var seconds = parseInt(line.substring(index + 1), 10);
-                if (path === currentProjectPath) {
-                    overallSeconds = isNaN(seconds) ? 0 : seconds;
-                    break;
-                }
+    // No saved project
+    if (!currentProjectPath) {
+        updateUI();
+        return;
+    }
+    var content = await evalScript("loadTrackedTimes()");
+    if (content && content !== "null") {
+        var lines = content.split(/\r?\n/);
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            var index = line.lastIndexOf(":");
+            if (index === -1) {
+                continue;
+            }
+            var path = line.substring(0, index);
+            var seconds = parseInt(line.substring(index + 1), 10);
+            if (path === currentProjectPath) {
+                overallSeconds = isNaN(seconds) ? 0 : seconds;
+                break;
             }
         }
     }
     updateUI();
 }
 async function saveTime() {
-    if (!currentProjectPath) {
+    if (!currentProjectPath || currentProjectPath === "null" || sessionSeconds === 0) {
         return;
     }
     var total = overallSeconds + sessionSeconds;
@@ -80,10 +99,15 @@ async function saveTime() {
 }
 async function checkProjectChanged() {
     var newPath = await evalScript("getCurrentProjectPath()");
+    if (newPath === "null" || newPath === "") {
+        newPath = null;
+    }
     if (newPath === currentProjectPath) {
         return;
     }
     await saveTime();
+    currentProjectPath = newPath;
+    updateSaveWarning();
     await loadProject();
 }
 async function init() {

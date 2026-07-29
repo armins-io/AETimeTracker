@@ -3,7 +3,6 @@
     ExtensionBundleId="dev.arminsio.aetimetracker"
     ExtensionBundleVersion="1.0.0"
     ExtensionBundleName="AETimeTracker"
-    xmlns="http://www.adobe.com/CEP/extensions"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <ExtensionList>
         <Extension Id="dev.arminsio.aetimetracker.panel" Version="1.0.0"/>
